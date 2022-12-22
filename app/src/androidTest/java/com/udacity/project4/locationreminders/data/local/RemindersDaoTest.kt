@@ -25,6 +25,34 @@ import org.junit.Test
 @SmallTest
 class RemindersDaoTest {
 
-//    TODO: Add testing implementation to the RemindersDao.kt
+    @get:Rule
+    var rule = InstantTaskExecutorRule()
+    private lateinit var instance: RemindersDatabase
+
+    @Before
+    fun getDb() {
+        instance = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RemindersDatabase::class.java
+        ).build()
+    }
+
+    @Test
+    fun insertFunctionTest1() = runBlockingTest {
+
+
+        val case1 = ReminderDTO("t1", "des", "loc", 4.6, 8.6, "case1")
+
+
+        instance.reminderDao().saveReminder(case1)
+
+        val expectedOutput =
+            instance.reminderDao().getReminderById("case1")
+                ?.let { case1 == it }
+
+        assertThat(expectedOutput,`is`(true))
+
+        instance.close()
+    }
 
 }
