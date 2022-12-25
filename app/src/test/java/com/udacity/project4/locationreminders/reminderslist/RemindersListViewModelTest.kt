@@ -1,5 +1,6 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import androidx.test.core.app.ApplicationProvider
@@ -15,7 +16,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
+import org.robolectric.annotation.Config
 
+@Config(sdk = [Build.VERSION_CODES.P])
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
@@ -43,7 +46,7 @@ class RemindersListViewModelTest {
         source.dataLoded=false
         viewModel.loadReminders()
         MatcherAssert.assertThat(
-            viewModel.showSnackBar.getOrAwaitValue(), CoreMatchers.`is`("Fail To Load Data")
+            viewModel.showSnackBar.getOrAwaitValue(), CoreMatchers.`is`("error")
         )
     }
 

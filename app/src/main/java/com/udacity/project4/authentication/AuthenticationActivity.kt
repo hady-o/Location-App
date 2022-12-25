@@ -28,6 +28,13 @@ class AuthenticationActivity : AppCompatActivity() {
         binding = ActivityAuthenticationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if(FirebaseAuth.getInstance().currentUser!=null)
+        {
+            val intent = Intent(this, RemindersActivity::class.java)
+            startActivity(intent)
+            Toast.makeText(applicationContext,"Sign in successful",Toast.LENGTH_LONG).show()
+            finish()
+        }
         binding.loginBtnId.setOnClickListener()
         {
             loginFlow()

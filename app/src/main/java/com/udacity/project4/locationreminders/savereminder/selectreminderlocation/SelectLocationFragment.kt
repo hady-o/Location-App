@@ -33,6 +33,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.bind
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import java.util.*
 
@@ -46,6 +47,7 @@ class SelectLocationFragment :OnMapReadyCallback, BaseFragment() {
     private var myMarker: Marker? = null
     private val TAG = SelectLocationFragment::class.java.simpleName
     private val locationPermission = 5000
+    private val FORGROUND_PERMITION_CODE = 33
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -206,7 +208,57 @@ class SelectLocationFragment :OnMapReadyCallback, BaseFragment() {
 
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
 
+        if(requestCode == FORGROUND_PERMITION_CODE){
+            if (grantResults.isEmpty() ||
+                grantResults[0] == PackageManager.PERMISSION_DENIED
+            ) {
+                makeSnackBarWithSettingAction()
+            }
+            else {
+                _viewModel.showToast.value = "colling"
+                getHome()
+            }
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(this::map.isInitialized){
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                getHome()
+            }
+            else{
+
+                makeSnackBarWithSettingAction()
+            }
+
+        }
+    }
+
+    private fun makeSnackBarWithSettingAction() {
+        Snackbar.make(
+            requireView(),
+            "grant location permission in order to play this game.",
+            Snackbar.LENGTH_INDEFINITE
+        )
+            .setAction("settings") {
+                startActivity(Intent().apply {
+                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })
+            }.show()
+
+}
 
 
 
