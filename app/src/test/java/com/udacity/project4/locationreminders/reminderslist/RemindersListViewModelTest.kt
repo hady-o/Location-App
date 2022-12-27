@@ -6,11 +6,15 @@ import androidx.lifecycle.Observer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.data.FakeDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.pauseDispatcher
+import kotlinx.coroutines.test.resumeDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,28 +42,32 @@ class RemindersListViewModelTest {
     fun getModel() {
         stopKoin()
         source = FakeDataSource()
+
         viewModel = RemindersListViewModel(ApplicationProvider.getApplicationContext(), source)
     }
-
     @Test
-    fun load1()= runBlockingTest {
-        source.dataLoded=false
+    fun loading(){
+        coroutineRule.pauseDispatcher()
         viewModel.loadReminders()
-        MatcherAssert.assertThat(
-            viewModel.showSnackBar.getOrAwaitValue(), CoreMatchers.`is`("error")
-        )
+        Assert.assertThat(viewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(true))
+        coroutineRule.resumeDispatcher()
+        Assert.assertThat(viewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(false))
+        Assert.assertThat(viewModel.remindersList.getOrAwaitValue().isEmpty(), CoreMatchers.`is`(true))
     }
 
+
     @Test
-    fun load2() = runBlockingTest{
-        coroutineRule.stop()
+    fun emptyTest(){
+        source.deleteAll()
         viewModel.loadReminders()
-        MatcherAssert.assertThat(
-            viewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(true)
-        )
-        coroutineRule.reRun()
-        MatcherAssert.assertThat(
-            viewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(false)
-        )
+        Assert.assertThat(viewModel.remindersList.getOrAwaitValue().isEmpty(), CoreMatchers.`is`(true))
+    }
+    @Test
+    fun errorTest(){
+        source.dataLoded=false
+        viewModel.loadReminders()
+        Assert.assertThat(viewModel.showSnackBar.getOrAwaitValue(), CoreMatchers.`is`("error"))
+        source.dataLoded=true
+
     }
 }

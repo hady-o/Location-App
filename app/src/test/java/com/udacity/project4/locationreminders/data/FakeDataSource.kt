@@ -56,5 +56,8 @@ class FakeDataSource : ReminderDataSource {
        source.clear()
     }
 
+     fun deleteAll() {
+        source.clear()
+    }
 
 }
